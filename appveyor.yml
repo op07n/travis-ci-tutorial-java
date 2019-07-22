@@ -1,0 +1,42 @@
+version: '{build}'
+skip_tags: true
+clone_depth: 10
+environment:
+  matrix:
+    # - JAVA_HOME: C:\Program Files\Java\jdk1.7.0
+    - JAVA_HOME: C:\Program Files\Java\jdk1.8.0
+branches:
+  only:
+    - master
+  except:
+    - gh-pages
+os: Visual Studio 2017
+install:
+  - ps: |
+      Add-Type -AssemblyName System.IO.Compression.FileSystem
+      if (!(Test-Path -Path "C:\maven" )) {
+        (new-object System.Net.WebClient).DownloadFile(
+          'http://www.us.apache.org/dist/maven/maven-3/3.6.1/binaries/apache-maven-3.6.1-bin.zip',
+          'C:\maven-bin.zip'
+        )
+        [System.IO.Compression.ZipFile]::ExtractToDirectory("C:\maven-bin.zip", "C:\maven")
+      }
+  - cmd: SET PATH=C:\maven\apache-maven-3.6.1\bin;%JAVA_HOME%\bin;%PATH%
+  - cmd: SET MAVEN_OPTS=-XX:MaxPermSize=2g -Xmx4g
+  - cmd: SET JAVA_OPTS=-XX:MaxPermSize=2g -Xmx4g
+  - cmd: SET M2_HOME=C:\maven\apache-maven-3.6.1  
+build_script:
+  - mvn clean package --batch-mode -DskipTest
+test_script:
+  - mvn clean install --batch-mode
+cache:
+  - C:\maven\
+  - C:\Users\appveyor\.m2
+  
+  
+after_build:
+  # - 7z a postgres-analyzer.zip C:\projects\postgres-analyzer\target\postgres-dpa-analyzer-1.0-SNAPSHOT.war
+
+artifacts:  # Archive the generated packages in the ci.appveyor.com build report.  - path: bin\Debug\*
+  # - path: postgres-analyzer.zip
+  #   name: artifacts-all 
