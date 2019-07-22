@@ -24,4 +24,3 @@ language: java
 # If a build is successful, the code is submitted for coverage analysis
 # after_success:
   # - bash <(curl -s https://codecov.io/bash)
-
